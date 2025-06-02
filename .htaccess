@@ -1,0 +1,44 @@
+# Enable URL rewriting
+RewriteEngine On
+RewriteBase /var/www/html/for_server/
+
+# Handle video URLs with category and title
+RewriteRule ^video/([^/]+)/([^/]+)/?$ watch.php?category=$1&slug=$2 [L,QSA]
+
+# Remove multiple slashes
+RewriteCond %{REQUEST_URI} ^(.*)//(.*)$
+RewriteRule . %1/%2 [R=301,L]
+
+# Disable directory browsing
+Options -Indexes
+
+# Deny access to .htaccess
+<Files .htaccess>
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Deny access to files with extensions .ini, .psd, .log, .sh
+<FilesMatch "\.(ini|psd|log|sh)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent viewing of .php files source code
+<FilesMatch "\.php$">
+    Header set X-Content-Type-Options nosniff
+</FilesMatch>
+
+# Protect against XSS attacks
+Header set X-XSS-Protection "1; mode=block"
+
+# Enable CORS
+Header set Access-Control-Allow-Origin "*"
+
+# Basic caching using Apache's cache control headers
+<IfModule mod_headers.c>
+    # 1 month for most static assets
+    <filesMatch ".(css|jpg|jpeg|png|gif|js|ico)$">
+        Header set Cache-Control "max-age=2592000, public"
+    </filesMatch>
+</IfModule>
